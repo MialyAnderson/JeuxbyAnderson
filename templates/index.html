@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JeuxbyAnderson</title>
+    <style>
+        /* Polices modernes */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        
+        /* Variables de couleurs */
+        :root {
+            --primary: #4A6FFF;
+            --primary-dark: #3959D9;
+            --background: #f5f7ff;
+            --text: #333344;
+            --card-bg: #ffffff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 2.5rem 0;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 2.5rem;
+            color: #555;
+            text-align: center;
+        }
+        
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .game-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .game-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .game-info {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .game-title {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .game-desc {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            flex-grow: 1;
+        }
+        
+        .game-btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+        
+        .game-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1.5rem;
+            color: #888;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Profitez de jouer avec les gens qui vous chérissent!</h1>
+        <p>L'univers des jeux de société en ligne</p>
+    </header>
+    
+    <div class="container">
+        <h2>Choisissez votre jeu préféré</h2>
+        
+        <div class="games-grid">
+            <!-- Carte Morpion -->
+            <div class="game-card">
+                <img src="../static/20231203_122558.jpg" alt="Jeu de Morpion" class="game-image">
+                <div class="game-info">
+                    <h3 class="game-title">Morpion</h3>
+                    <p class="game-desc">Le classique jeu de Tic-Tac-Toe. Alignez trois symboles identiques pour gagner!</p>
+                    <a href="morpion.html" class="game-btn">Jouer maintenant</a>
+                </div>
+            </div>
+            
+            <!-- Carte Echecs -->
+            <div class="game-card">
+                <img src="../static/image.jpg" alt="Jeu d'Échecs" class="game-image">
+                <div class="game-info">
+                    <h3 class="game-title">Échecs</h3>
+                    <p class="game-desc">Le jeu de stratégie par excellence. Mettez votre adversaire en échec et mat!</p>
+                    <a href="echec.html" class="game-btn">Jouer maintenant</a>
+                </div>
+            </div>
+            
+            <!-- Carte Shogi -->
+            <div class="game-card">
+                <img src="../static/3331890418_f30023a3bc_b.jpg" alt="Jeu de Shogi" class="game-image">
+                <div class="game-info">
+                    <h3 class="game-title">Shogi</h3>
+                    <p class="game-desc">Les échecs japonais. Capturez et réutilisez les pièces de votre adversaire!</p>
+                    <a href="shogi.html" class="game-btn">Jouer maintenant</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        &copy; 2025 JeuxbyAnderson. Tous droits réservés.
+    </footer>
+</body>
+</html>

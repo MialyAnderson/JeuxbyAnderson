@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morpion - JeuxbyAnderson</title>
+    <style>
+        /* Polices modernes */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        
+        /* Variables de couleurs */
+        :root {
+            --primary: #4A6FFF;
+            --primary-dark: #3959D9;
+            --background: #f5f7ff;
+            --text: #333344;
+            --card-bg: #ffffff;
+            --grid-line: #333344;
+            --x-color: #FF6B6B;
+            --o-color: #4A6FFF;
+            --hover-bg: #f0f0f0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .game-info {
+            margin-bottom: 2rem;
+        }
+        
+        .game-info h2 {
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+        
+        .status {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        /* Style du plateau de jeu */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            margin: 0 auto;
+            max-width: 400px;
+            aspect-ratio: 1/1;
+            background-color: var(--grid-line);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cell {
+            background-color: var(--card-bg);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .cell:hover {
+            background-color: var(--hover-bg);
+        }
+        
+        .cell.x {
+            color: var(--x-color);
+        }
+        
+        .cell.o {
+            color: var(--o-color);
+        }
+        
+        /* Bouton de réinitialisation */
+        .reset-btn {
+            margin-top: 2rem;
+            padding: 0.8rem 2rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .reset-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        /* Score */
+        .score {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 2rem 0;
+            padding: 1rem;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .player-x {
+            color: var(--x-color);
+        }
+        
+        .player-o {
+            color: var(--o-color);
+        }
+        
+        /* Animation pour les symboles */
+        @keyframes pop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .cell.x, .cell.o {
+            animation: pop 0.3s ease-out;
+        }
+        
+        /* Ligne du footer */
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            padding: 1.5rem;
+            color: #888;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        /* Design responsive */
+        @media (max-width: 500px) {
+            .board {
+                max-width: 300px;
+            }
+            
+            .cell {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Morpion</h1>
+    </header>
+    
+    <div class="container">
+        <div class="game-info">
+            <h2>Alignez trois symboles pour gagner !</h2>
+            <div class="status">Au tour de : <span id="current-player">X</span></div>
+        </div>
+        
+        <div class="score">
+            <div class="score-item">
+                <div class="score-label player-x">Joueur X</div>
+                <div class="score-value" id="score-x">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Match nul</div>
+                <div class="score-value" id="score-draw">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label player-o">Joueur O</div>
+                <div class="score-value" id="score-o">0</div>
+            </div>
+        </div>
+        
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        
+        <button class="reset-btn" id="reset-btn">Nouvelle partie</button>
+    </div>
+    
+    <footer>
+        <p>Profitez de jouer avec les gens qui vous chérissent !</p>
+        <p>&copy; 2025 JeuxbyAnderson. Tous droits réservés.</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const board = document.getElementById('board');
+            const cells = document.querySelectorAll('.cell');
+            const status = document.getElementById('current-player');
+            const resetBtn = document.getElementById('reset-btn');
+            const scoreX = document.getElementById('score-x');
+            const scoreO = document.getElementById('score-o');
+            const scoreDraw = document.getElementById('score-draw');
+            
+            let currentPlayer = 'X';
+            let gameBoard = ['', '', '', '', '', '', '', '', ''];
+            let gameActive = true;
+            let scores = {
+                X: 0,
+                O: 0,
+                draw: 0
+            };
+            
+            // Les combinaisons gagnantes
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // lignes
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // colonnes
+                [0, 4, 8], [2, 4, 6]             // diagonales
+            ];
+            
+            // Initialiser le jeu
+            function initGame() {
+                gameBoard = ['', '', '', '', '', '', '', '', ''];
+                gameActive = true;
+                currentPlayer = 'X';
+                status.textContent = 'X';
+                
+                cells.forEach(cell => {
+                    cell.textContent = '';
+                    cell.classList.remove('x', 'o');
+                });
+            }
+            
+            // Vérifier s'il y a un gagnant
+            function checkWinner() {
+                let roundWon = false;
+                
+                for (let i = 0; i < winPatterns.length; i++) {
+                    const [a, b, c] = winPatterns[i];
+                    
+                    if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                        roundWon = true;
+                        break;
+                    }
+                }
+                
+                if (roundWon) {
+                    updateStatus(`Joueur ${currentPlayer} a gagné !`);
+                    gameActive = false;
+                    scores[currentPlayer]++;
+                    updateScores();
+                    return;
+                }
+                
+                if (!gameBoard.includes('')) {
+                    updateStatus('Match nul !');
+                    gameActive = false;
+                    scores.draw++;
+                    updateScores();
+                    return;
+                }
+                
+                // Si pas de gagnant, changer de joueur
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                updateStatus(`Au tour de : ${currentPlayer}`);
+            }
+            
+            // Mettre à jour le statut du jeu
+            function updateStatus(message) {
+                if (message.includes('Au tour de')) {
+                    status.textContent = message.split(':')[1].trim();
+                } else {
+                    status.textContent = message;
+                }
+            }
+            
+            // Mettre à jour les scores
+            function updateScores() {
+                scoreX.textContent = scores.X;
+                scoreO.textContent = scores.O;
+                scoreDraw.textContent = scores.draw;
+            }
+            
+            // Gérer le clic sur une case
+            function handleCellClick(e) {
+                const cell = e.target;
+                const index = parseInt(cell.getAttribute('data-index'));
+                
+                if (gameBoard[index] !== '' || !gameActive) {
+                    return;
+                }
+                
+                gameBoard[index] = currentPlayer;
+                cell.textContent = currentPlayer;
+                cell.classList.add(currentPlayer.toLowerCase());
+                
+                checkWinner();
+            }
+            
+            // Ajouter les écouteurs d'événements
+            cells.forEach(cell => {
+                cell.addEventListener('click', handleCellClick);
+            });
+            
+            resetBtn.addEventListener('click', initGame);
+            
+            // Initialiser le jeu au chargement
+            initGame();
+        });
+    </script>
+</body>
+</html>

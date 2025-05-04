@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Échecs - JeuxbyAnderson</title>
+    <style>
+        /* Polices modernes */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        
+        /* Variables de couleurs */
+        :root {
+            --primary: #4A6FFF;
+            --primary-dark: #3959D9;
+            --background: #f5f7ff;
+            --text: #333344;
+            --light-square: #f0d9b5;
+            --dark-square: #b58863;
+            --highlight: rgba(155, 199, 0, 0.41);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .game-info {
+            margin-bottom: 2rem;
+        }
+        
+        .game-info h2 {
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+        
+        .status {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        /* Style du plateau d'échecs */
+        .chessboard {
+            width: 480px;
+            height: 480px;
+            margin: 0 auto;
+            border: 2px solid #333;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .square {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .light {
+            background-color: var(--light-square);
+        }
+        
+        .dark {
+            background-color: var(--dark-square);
+        }
+        
+        .square.selected {
+            background-color: var(--highlight);
+        }
+        
+        .square.highlight {
+            position: relative;
+        }
+        
+        .square.highlight::before {
+            content: '';
+            position: absolute;
+            width: 25%;
+            height: 25%;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+        }
+        
+        /* Pièces d'échecs utilisant Unicode */
+        .piece {
+            user-select: none;
+            font-size: 2.5rem;
+        }
+        
+        .white-piece {
+            color: #fff;
+            text-shadow: 0 0 2px #000;
+        }
+        
+        .black-piece {
+            color: #000;
+        }
+        
+        /* Contrôles de jeu */
+        .controls {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .controls button {
+            padding: 0.8rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .controls button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        /* Notation des cases */
+        .board-notation {
+            display: flex;
+            width: 480px;
+            margin: 0 auto;
+            justify-content: space-between;
+        }
+        
+        .board-notation span {
+            width: 60px;
+            text-align: center;
+            padding: 5px 0;
+            font-weight: 600;
+        }
+        
+        .file-notation {
+            display: flex;
+            flex-direction: column;
+            height: 480px;
+            margin-right: 5px;
+            justify-content: space-between;
+        }
+        
+        .file-notation span {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .board-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 500px) {
+            .chessboard {
+                width: 320px;
+                height: 320px;
+            }
+            
+            .board-notation {
+                width: 320px;
+            }
+            
+            .board-notation span, .file-notation span {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .piece {
+                font-size: 2rem;
+            }
+        }
+        
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            padding: 1.5rem;
+            color: #888;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Échecs</h1>
+    </header>
+    
+    <div class="container">
+        <div class="game-info">
+            <h2>Le jeu de stratégie par excellence</h2>
+            <div class="status">Au tour des <span id="current-player">Blancs</span></div>
+        </div>
+        
+        <div class="board-wrapper">
+            <div class="file-notation">
+                <span>8</span>
+                <span>7</span>
+                <span>6</span>
+                <span>5</span>
+                <span>4</span>
+                <span>3</span>
+                <span>2</span>
+                <span>1</span>
+            </div>
+            
+            <div>
+                <div class="chessboard" id="chessboard"></div>
+                
+                <div class="board-notation">
+                    <span>a</span>
+                    <span>b</span>
+                    <span>c</span>
+                    <span>d</span>
+                    <span>e</span>
+                    <span>f</span>
+                    <span>g</span>
+                    <span>h</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="reset-btn">Nouvelle partie</button>
+            <button id="undo-btn">Annuler</button>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Profitez de jouer avec les gens qui vous chérissent !</p>
+        <p>&copy; 2025 JeuxbyAnderson. Tous droits réservés.</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const chessboard = document.getElementById('chessboard');
+            const currentPlayerElement = document.getElementById('current-player');
+            const resetBtn = document.getElementById('reset-btn');
+            const undoBtn = document.getElementById('undo-btn');
+            
+            // Représentation Unicode des pièces d'échecs
+            const PIECES = {
+                'white': {
+                    'pawn': '♙',
+                    'rook': '♖',
+                    'knight': '♘',
+                    'bishop': '♗',
+                    'queen': '♕',
+                    'king': '♔'
+                },
+                'black': {
+                    'pawn': '♟',
+                    'rook': '♜',
+                    'knight': '♞',
+                    'bishop': '♝',
+                    'queen': '♛',
+                    'king': '♚'
+                }
+            };
+            
+            // État du jeu
+            let gameState = {
+                board: [],
+                currentPlayer: 'white',
+                selectedPiece: null,
+                moveHistory: [],
+                check: false,
+                gameOver: false
+            };
+            
+            // Initialisation du plateau
+            function initializeBoard() {
+                gameState.board = [
+                    // Rangée 8 (pièces noires)
+                    ['black-rook', 'black-knight', 'black-bishop', 'black-queen', 'black-king', 'black-bishop', 'black-knight', 'black-rook'],
+                    // Rangée 7 (pions noirs)
+                    ['black-pawn', 'black-pawn', 'black-pawn', 'black-pawn', 'black-pawn', 'black-pawn', 'black-pawn', 'black-pawn'],
+                    // Rangées 6-3 (vides)
+                    Array(8).fill(null),
+                    Array(8).fill(null),
+                    Array(8).fill(null),
+                    Array(8).fill(null),
+                    // Rangée 2 (pions blancs)
+                    ['white-pawn', 'white-pawn', 'white-pawn', 'white-pawn', 'white-pawn', 'white-pawn', 'white-pawn', 'white-pawn'],
+                    // Rangée 1 (pièces blanches)
+                    ['white-rook', 'white-knight', 'white-bishop', 'white-queen', 'white-king', 'white-bishop', 'white-knight', 'white-rook']
+                ];
+            }
+            
+            // Création du plateau visuel
+            function createChessboard() {
+                chessboard.innerHTML = '';
+                
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const square = document.createElement('div');
+                        square.classList.add('square');
+                        square.classList.add((row + col) % 2 === 0 ? 'light' : 'dark');
+                        square.dataset.row = row;
+                        square.dataset.col = col;
+                        square.addEventListener('click', handleSquareClick);
+                        
+                        // Ajouter la pièce si elle existe
+                        const piece = gameState.board[row][col];
+                        if (piece) {
+                            const [color, type] = piece.split('-');
+                            const pieceElement = document.createElement('div');
+                            pieceElement.classList.add('piece');
+                            pieceElement.classList.add(`${color}-piece`);
+                            pieceElement.textContent = PIECES[color][type];
+                            square.appendChild(pieceElement);
+                        }
+                        
+                        chessboard.appendChild(square);
+                    }
+                }
+            }
+            
+            // Gestion du clic sur une case
+            function handleSquareClick(e) {
+                if (gameState.gameOver) return;
+                
+                const square = e.target.closest('.square');
+                const row = parseInt(square.dataset.row);
+                const col = parseInt(square.dataset.col);
+                
+                // Si une pièce est déjà sélectionnée
+                if (gameState.selectedPiece) {
+                    const [selectedRow, selectedCol] = gameState.selectedPiece;
+                    const piece = gameState.board[selectedRow][selectedCol];
+                    
+                    // Si on clique sur la même pièce, la désélectionner
+                    if (selectedRow === row && selectedCol === col) {
+                        deselectPiece();
+                        return;
+                    }
+                    
+                    // Si on clique sur une case vide ou une pièce ennemie
+                    if (!gameState.board[row][col] || isEnemyPiece(row, col)) {
+                        // Vérifier si le mouvement est valide
+                        if (isValidMove(selectedRow, selectedCol, row, col)) {
+                            // Sauvegarder le coup dans l'historique
+                            gameState.moveHistory.push({
+                                from: [selectedRow, selectedCol],
+                                to: [row, col],
+                                piece: gameState.board[selectedRow][selectedCol],
+                                captured: gameState.board[row][col]
+                            });
+                            
+                            // Déplacer la pièce
+                            gameState.board[row][col] = piece;
+                            gameState.board[selectedRow][selectedCol] = null;
+                            
+                            // Vérifier les promotions de pion
+                            checkPawnPromotion(row, col);
+                            
+                            // Changer de joueur
+                            gameState.currentPlayer = gameState.currentPlayer === 'white' ? 'black' : 'white';
+                            currentPlayerElement.textContent = gameState.currentPlayer === 'white' ? 'Blancs' : 'Noirs';
+                            
+                            // Vérifier si échec
+                            gameState.check = isKingInCheck(gameState.currentPlayer);
+                            
+                            // Vérifier si échec et mat
+                            if (isCheckmate()) {
+                                gameState.gameOver = true;
+                                const winner = gameState.currentPlayer === 'white' ? 'Noirs' : 'Blancs';
+                                document.querySelector('.status').textContent = `Échec et mat ! Les ${winner} gagnent.`;
+                            } else if (gameState.check) {
+                                document.querySelector('.status').textContent = `Échec ! Au tour des ${gameState.currentPlayer === 'white' ? 'Blancs' : 'Noirs'}.`;
+                            } else {
+                                document.querySelector('.status').textContent = `Au tour des ${gameState.currentPlayer === 'white' ? 'Blancs' : 'Noirs'}.`;
+                            }
+                            
+                            // Mettre à jour le plateau
+                            createChessboard();
+                        }
+                        
+                        deselectPiece();
+                    } 
+                    // Si on clique sur une pièce amie, la sélectionner à la place
+                    else if (isOwnPiece(row, col)) {
+                        deselectPiece();
+                        selectPiece(row, col);
+                    }
+                } 
+                // Si aucune pièce n'est sélectionnée et qu'on clique sur une pièce de notre couleur
+                else if (gameState.board[row][col] && isOwnPiece(row, col)) {
+                    selectPiece(row, col);
+                }
+            }
+            
+            // Sélectionner une pièce
+            function selectPiece(row, col) {
+                gameState.selectedPiece = [row, col];
+                const square = document.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
+                square.classList.add('selected');
+                
+                // Afficher les mouvements possibles
+                showPossibleMoves(row, col);
+            }
+            
+            // Désélectionner une pièce
+            function deselectPiece() {
+                if (gameState.selectedPiece) {
+                    const [row, col] = gameState.selectedPiece;
+                    const square = document.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
+                    square.classList.remove('selected');
+                    
+                    // Cacher les mouvements possibles
+                    document.querySelectorAll('.square.highlight').forEach(sq => {
+                        sq.classList.remove('highlight');
+                    });
+                    
+                    gameState.selectedPiece = null;
+                }
+            }
+            
+            // Vérifier si c'est une pièce ennemie
+            function isEnemyPiece(row, col) {
+                const piece = gameState.board[row][col];
+                if (!piece) return false;
+                return piece.startsWith(gameState.currentPlayer === 'white' ? 'black' : 'white');
+            }
+            
+            // Vérifier si c'est une pièce amie
+            function isOwnPiece(row, col) {
+                const piece = gameState.board[row][col];
+                if (!piece) return false;
+                return piece.startsWith(gameState.currentPlayer);
+            }
+            
+            // Fonction simplifiée pour vérifier si un mouvement est valide
+            // Note: Dans un vrai jeu d'échecs, cette fonction serait beaucoup plus complexe
+            function isValidMove(fromRow, fromCol, toRow, toCol) {
+                const piece = gameState.board[fromRow][fromCol];
+                if (!piece) return false;
+                
+                const [color, type] = piece.split('-');
+                
+                // Règles de base pour chaque type de pièce
+                switch (type) {
+                    case 'pawn':
+                        return isValidPawnMove(fromRow, fromCol, toRow, toCol, color);
+                    case 'rook':
+                        return isValidRookMove(fromRow, fromCol, toRow, toCol);
+                    case 'knight':
+                        return isValidKnightMove(fromRow, fromCol, toRow, toCol);
+                    case 'bishop':
+                        return isValidBishopMove(fromRow, fromCol, toRow, toCol);
+                    case 'queen':
+                        return isValidQueenMove(fromRow, fromCol, toRow, toCol);
+                    case 'king':
+                        return isValidKingMove(fromRow, fromCol, toRow, toCol);
+                    default:
+                        return false;
+                }
+            }
+            
+            // Vérifier mouvement de pion
+            function isValidPawnMove(fromRow, fromCol, toRow, toCol, color) {
+                const direction = color === 'white' ? -1 : 1;
+                const startRow = color === 'white' ? 6 : 1;
+                
+                // Mouvement simple
+                if (fromCol === toCol && toRow === fromRow + direction && !gameState.board[toRow][toCol]) {
+                    return true;
+                }
+                
+                // Double mouvement depuis la position de départ
+                if (fromCol === toCol && fromRow === startRow && toRow === fromRow + 2 * direction && 
+                    !gameState.board[fromRow + direction][fromCol] && !gameState.board[toRow][toCol]) {
+                    return true;
+                }
+                
+                // Capture en diagonale
+                if (Math.abs(fromCol - toCol) === 1 && toRow === fromRow + direction && 
+                    gameState.board[toRow][toCol] && gameState.board[toRow][toCol].startsWith(color === 'white' ? 'black' : 'white')) {
+                    return true;
+                }
+                
+                return false;
+            }
+            
+            // Vérifier mouvement de tour
+            function isValidRookMove(fromRow, fromCol, toRow, toCol) {
+                // Mouvement horizontal ou vertical uniquement
+                if (fromRow !== toRow && fromCol !== toCol) return false;
+                
+                // Vérifier le chemin
+                if (fromRow === toRow) {
+                    // Mouvement horizontal
+                    const step = fromCol < toCol ? 1 : -1;
+                    for (let col = fromCol + step; col !== toCol; col += step) {
+                        if (gameState.board[fromRow][col]) return false;
+                    }
+                } else {
+                    // Mouvement vertical
+                    const step = fromRow < toRow ? 1 : -1;
+                    for (let row = fromRow + step; row !== toRow; row += step) {
+                        if (gameState.board[row][fromCol]) return false;
+                    }
+                }
+                
+                return true;
+            }
+            
+            // Vérifier mouvement de cavalier
+            function isValidKnightMove(fromRow, fromCol, toRow, toCol) {
+                const rowDiff = Math.abs(fromRow - toRow);
+                const colDiff = Math.abs(fromCol - toCol);
+                
+                return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
+            }
+            
+            // Vérifier mouvement de fou
+            function isValidBishopMove(fromRow, fromCol, toRow, toCol) {
+                const rowDiff = Math.abs(fromRow - toRow);
+                const colDiff = Math.abs(fromCol - toCol);
+                
+                // Mouvement diagonal uniquement
+                if (rowDiff !== colDiff) return false;
+                
+                // Vérifier le chemin
+                const rowStep = fromRow < toRow ? 1 : -1;
+                const colStep = fromCol < toCol ? 1 : -1;
+                
+                let row = fromRow + rowStep;
+                let col = fromCol + colStep;
+                
+                while (row !== toRow && col !== toCol) {
+                    if (gameState.board[row][col]) return false;
+                    row += rowStep;
+                    col += colStep;
+                }
+                
+                return true;
+            }
+            
+            // Vérifier mouvement de dame
+            function isValidQueenMove(fromRow, fromCol, toRow, toCol) {
+                return isValidRookMove(fromRow, fromCol, toRow, toCol) || 
+                       isValidBishopMove(fromRow, fromCol, toRow, toCol);
+            }
+            
+            // Vérifier mouvement de roi
+            function isValidKingMove(fromRow, fromCol, toRow, toCol) {
+                const rowDiff = Math.abs(fromRow - toRow);
+                const colDiff = Math.abs(fromCol - toCol);
+                
+                return rowDiff <= 1 && colDiff <= 1;
+            }
+            
+            // Afficher les mouvements possibles
+            function showPossibleMoves(row, col) {
+                for (let toRow = 0; toRow < 8; toRow++) {
+                    for (let toCol = 0; toCol < 8; toCol++) {
+                        if (isValidMove(row, col, toRow, toCol)) {
+                            const square = document.querySelector(`.square[data-row="${toRow}"][data-col="${toCol}"]`);
+                            square.classList.add('highlight');
+                        }
+                    }
+                }
+            }
+            
+            // Vérifier si un roi est en échec
+            function isKingInCheck(color) {
+                // Trouver la position du roi
+                let kingRow, kingCol;
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        if (gameState.board[row][col] === `${color}-king`) {
+                            kingRow = row;
+                            kingCol = col;
+                            break;
+                        }
+                    }
+                }
+                
+                // Vérifier si une pièce ennemie peut attaquer le roi
+                const enemyColor = color === 'white' ? 'black' : 'white';
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const piece = gameState.board[row][col];
+                        if (piece && piece.startsWith(enemyColor)) {
+                            if (isValidMove(row, col, kingRow, kingCol)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                
+                return false;
+            }
+            
+            // Vérifier s'il y a échec et mat
+            function isCheckmate() {
+                if (!gameState.check) return false;
+                
+                // Pour chaque pièce du joueur actuel
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const piece = gameState.board[row][col];
+                        if (piece && piece.startsWith(gameState.currentPlayer)) {
+                            // Pour chaque mouvement possible
+                            for (let toRow = 0; toRow < 8; toRow++) {
+                                for (let toCol = 0; toCol < 8; toCol++) {
+                                    if (isValidMove(row, col, toRow, toCol)) {
+                                        // Simuler le mouvement
+                                        const savedPiece = gameState.board[toRow][toCol];
+                                        gameState.board[toRow][toCol] = piece;
+                                        gameState.board[row][col] = null;
+                                        
+                                        // Vérifier si le roi est toujours en échec
+                                        const stillInCheck = isKingInCheck(gameState.currentPlayer);
+                                        
+                                        // Annuler le mouvement
+                                        gameState.board[row][col] = piece;
+                                        gameState.board[toRow][toCol] = savedPiece;
+                                        
+                                        // Si un mouvement peut sortir de l'échec, ce n'est pas un mat
+                                        if (!stillInCheck) return false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Si aucun mouvement ne peut sortir de l'échec, c'est un mat
+                return true;
+            }
+            
+            // Vérifier la promotion d'un pion
+            function checkPawnPromotion(row, col) {
+                const piece = gameState.board[row][col];
+                if (!piece) return;
+                
+                const [color, type] = piece.split('-');
+                if (type === 'pawn') {
+                    // Pion blanc qui atteint la rangée 0 ou pion noir qui atteint la rangée 7
+                    if ((color === 'white' && row === 0) || (color === 'black' && row === 7)) {
+                        // Promouvoir automatiquement en dame pour simplifier
+                        gameState.board[row][col] = `${color}-queen`;
+                    }
+                }
+            }
+            
+            // Annuler le dernier coup
+            function undoLastMove() {
+                if (gameState.moveHistory.length === 0) return;
+                
+                const lastMove = gameState.moveHistory.pop();
+                const { from, to, piece, captured } = lastMove;
+                
+                // Remettre la pièce à sa position d'origine
+                gameState.board[from[0]][from[1]] = piece;
+                gameState.board[to[0]][to[1]] = captured;
+                
+                // Changer de joueur
+                gameState.currentPlayer = gameState.currentPlayer === 'white' ? 'black' : 'white';
+                currentPlayerElement.textContent = gameState.currentPlayer === 'white' ? 'Blancs' : 'Noirs';
+                
+                // Réinitialiser l'état d'échec et du jeu
+                gameState.check = isKingInCheck(gameState.currentPlayer);
+                gameState.gameOver = false;
+                
+                if (gameState.check) {
+                    document.querySelector('.status').textContent = `Échec ! Au tour des ${gameState.currentPlayer === 'white' ? 'Blancs' : 'Noirs'}.`;
+                } else {
+                    document.querySelector('.status').textContent = `Au tour des ${gameState.currentPlayer === 'white' ? 'Blancs' : 'Noirs'}.`;
+                }
+                
+                createChessboard();
+            }
+            
+            // Réinitialiser le jeu
+            function resetGame() {
+                initializeBoard();
+                gameState.currentPlayer = 'white';
+                gameState.selectedPiece = null;
+                gameState.moveHistory = [];
+                gameState.check = false;
+                gameState.gameOver = false;
+                currentPlayerElement.textContent = 'Blancs';
+                document.querySelector('.status').textContent = 'Au tour des Blancs';
+                createChessboard();
+            }
+            
+            // Ajouter les écouteurs d'événements
+            resetBtn.addEventListener('click', resetGame);
+            undoBtn.addEventListener('click', undoLastMove);
+            
+            // Initialiser le jeu
+            initializeBoard();
+            createChessboard();
+        });
+    </script>
+</body>
+</html>
